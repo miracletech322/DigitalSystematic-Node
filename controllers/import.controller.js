@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const formidable = require('formidable');
+const XLSX = require('xlsx');
 
 exports.uploadAction = async (req, res) => {
     try {
@@ -20,8 +21,14 @@ exports.uploadAction = async (req, res) => {
                 return res.status(200).json({ status: 'no_avatar' });
             }
 
+            const filePath = uploadedFile[0].filepath;
+            const workbook = XLSX.readFile(filePath);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const xlsJson = XLSX.utils.sheet_to_json(sheet);
+
             return res.status(200).json({
                 status: "success",
+                xlsJson
             });
         });
     } catch (e) {
