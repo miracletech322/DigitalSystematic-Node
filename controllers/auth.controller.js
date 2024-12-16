@@ -42,7 +42,7 @@ exports.signinAction = async (req, res) => {
 
 exports.signupAction = async (req, res) => {
     try {
-        const { fullname, email, password, phone } = req.body;
+        const { email, password, role } = req.body;
 
         const existUsers = await User.find({ email });
         if (existUsers.length > 0) {
@@ -55,10 +55,9 @@ exports.signupAction = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const passwordString = await bcrypt.hash(password, salt);
         const user = new User({
-            fullname,
             email,
-            phone,
             password: passwordString,
+            role,
         });
 
         let userData = await user.save();
