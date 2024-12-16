@@ -1,0 +1,25 @@
+{
+  "name": "book-keeping-backend",
+  "version": "1.0.0",
+  "description": "BookKeeping Backend Project",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Miracle",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "compression": "^1.7.5",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "formidable": "^3.5.2",
+    "jwt-simple": "^0.5.6",
+    "mongoose": "^8.8.3",
+    "morgan": "^1.10.0"
+  }
+}
