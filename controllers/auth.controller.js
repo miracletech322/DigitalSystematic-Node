@@ -17,7 +17,6 @@ exports.signinAction = async (req, res) => {
             const status = await bcrypt.compare(password, hashedPassword);
             if (status) {
                 const token = jwt.encode(userData, '0xDbc23AE43a150ff8884B02Cea117b22D1c3b9796');
-
                 const user = userData[0].toObject();
                 delete user.password;
 
