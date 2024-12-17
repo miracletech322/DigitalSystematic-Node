@@ -42,7 +42,7 @@ exports.signinAction = async (req, res) => {
 
 exports.signupAction = async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { managerName, email, password, role } = req.body;
 
         const existUsers = await User.find({ email });
         if (existUsers.length > 0) {
@@ -58,6 +58,7 @@ exports.signupAction = async (req, res) => {
             email,
             password: passwordString,
             role,
+            managerName
         });
 
         let userData = await user.save();

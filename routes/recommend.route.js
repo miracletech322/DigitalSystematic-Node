@@ -1,8 +1,8 @@
 const express = require('express');
-const importController = require('../controllers/import.controller');
+const recommendController = require('../controllers/recommend.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const router = express.Router();
 
-router.post('/upload', [authMiddleware.checkAuth], importController.uploadAction);
+router.post('/update', [authMiddleware.checkAuth], recommendController.updateAction);
 
 module.exports = router;
