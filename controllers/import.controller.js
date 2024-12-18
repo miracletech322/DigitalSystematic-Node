@@ -67,9 +67,27 @@ exports.uploadAction = async (req, res) => {
 
 exports.dashboardAction = async (req, res) => {
     try {
-        const users = await User.find(
-            { role: { $ne: 'Admin' } }
-        );
+        const users = await User.aggregate([
+            {
+                $match: {
+                    role: { $ne: 'Admin' }
+                }  // Use $match to filter users whose role is not 'Admin'
+            },
+            {
+                $lookup: {
+                    from: 'recommends',  // The name of the Recommend collection in MongoDB
+                    localField: '_id',    // Field from User collection
+                    foreignField: 'userId', // Field from Recommend collection
+                    as: 'recommends'  // The new field that will store the joined data
+                }
+            },
+            {
+                $project: {
+                    password: 0,
+                    email: 0,
+                }
+            }
+        ]);
 
         return res.status(200).json({
             status: "success",
