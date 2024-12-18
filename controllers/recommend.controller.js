@@ -46,7 +46,7 @@ exports.usersAction = async (req, res) => {
 
         for (let i = 0; i < lst.length; i++) {
             if (lst[i].role == 'Manager') {
-                lst[i].recommends = getTemplateData(users, req.user.level)
+                lst[i].recommends = getTemplateData(users, lst[i].level)
             }
         }
 
