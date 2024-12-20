@@ -44,6 +44,7 @@ exports.usersAction = async (req, res) => {
             attributes: {
                 exclude: ['password', 'email'],
             },
+            order: [['id', 'ASC']],
         });
 
         const users = [];
