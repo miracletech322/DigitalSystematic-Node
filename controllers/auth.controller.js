@@ -6,33 +6,37 @@ exports.signinAction = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const userData = await User.find({ email }).exec();
+        const userData = await User.findOne({
+            where: { email },
+        });
 
-        if (userData.length === 0) {
-            res.status(200).json({
+        if (!userData) {
+            return res.status(200).json({
                 status: "not_exist",
             });
-        } else {
-            const hashedPassword = userData[0].password;
-            const status = await bcrypt.compare(password, hashedPassword);
-            if (status) {
-                const token = jwt.encode(userData, '0xDbc23AE43a150ff8884B02Cea117b22D1c3b9796');
-                const user = userData[0].toObject();
-                delete user.password;
+        }
 
-                res.status(200).json({
-                    status: "success",
-                    user: user,
-                    token,
-                });
-            } else {
-                res.status(200).json({
-                    status: "wrong",
-                });
-            }
+        const hashedPassword = userData.password;
+        const isPasswordValid = await bcrypt.compare(password, hashedPassword);
+
+        if (isPasswordValid) {
+            const token = jwt.encode(userData.toJSON(), '0xDbc23AE43a150ff8884B02Cea117b22D1c3b9796');
+
+            const user = userData.toJSON();
+            delete user.password;
+
+            return res.status(200).json({
+                status: "success",
+                user: user,
+                token,
+            });
+        } else {
+            return res.status(200).json({
+                status: "wrong",
+            });
         }
     } catch (e) {
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: e.message,
         });
@@ -43,8 +47,8 @@ exports.signupAction = async (req, res) => {
     try {
         const { managerName, email, password, role } = req.body;
 
-        const existUsers = await User.find({ email });
-        if (existUsers.length > 0) {
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
             res.status(200).json({
                 status: "exist",
             });
@@ -52,25 +56,23 @@ exports.signupAction = async (req, res) => {
         }
 
         const salt = await bcrypt.genSalt(10);
-        const passwordString = await bcrypt.hash(password, salt);
-        const user = new User({
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const user = await User.create({
             email,
-            password: passwordString,
+            password: hashedPassword,
             role,
-            managerName
+            managerName,
         });
 
-        let userData = await user.save();
-
-        userData = userData.toObject();
+        const userData = { ...user.toJSON() };
         delete userData.password;
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             user: userData,
         });
     } catch (e) {
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: e.message,
         });

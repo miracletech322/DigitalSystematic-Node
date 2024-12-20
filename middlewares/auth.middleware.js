@@ -5,7 +5,7 @@ exports.checkAuth = async (req, res, next) => {
     try {
         const token = req.headers['authorization'];
         var userData = jwt.decode(token, secret);
-        req.user = userData[0];
+        req.user = userData;
         next();
     } catch (e) {
         res.status(401).json({

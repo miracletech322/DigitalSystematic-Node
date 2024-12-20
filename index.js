@@ -1,24 +1,27 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 const compression = require('compression');
 const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const http = require('http');
-
-const appRoute = require('./routes');
+const mysql = require('mysql2');
 
 dotenv.config();
 
+const pool = mysql.createPool({
+    host: process.env.DB_HOSTNAME,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+});
+pool.promise();
+
+const appRoute = require('./routes');
+
 const app = express();
 const server = http.createServer(app);
-
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch((err) => console.log(err));
 
 app.use(cookieParser());
 app.use(morgan('tiny'));

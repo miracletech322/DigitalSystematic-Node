@@ -1,24 +1,31 @@
 const Recommend = require("./../models/recommend.model");
 const User = require("./../models/user.model");
-const mongoose = require('mongoose');
 
 exports.updateAction = async (req, res) => {
     try {
         const { status } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
-        const recommend = await Recommend.findOneAndUpdate(
-            { userId }, // Query to find the document
-            { status }, // Update data
-            { new: true, upsert: true } // Options: Return the updated document, and create if it doesn't exist
-        );
+        let recommend = await Recommend.findOne({
+            where: {
+                userId: userId
+            }
+        });
 
-        res.status(200).json({
+        if (recommend) {
+            recommend = await recommend.update({ status });
+        } else {
+            recommend = await Recommend.create({
+                userId,
+                status
+            });
+        }
+        return res.status(200).json({
             status: "success",
             recommend: recommend,
         });
     } catch (e) {
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: e.message,
         });
@@ -27,16 +34,22 @@ exports.updateAction = async (req, res) => {
 
 exports.usersAction = async (req, res) => {
     try {
-        const users = await User.aggregate([
-            {
-                $lookup: {
-                    from: 'recommends',  // The name of the Recommend collection in MongoDB
-                    localField: '_id',    // Field from User collection
-                    foreignField: 'userId', // Field from Recommend collection
-                    as: 'recommends'  // The new field that will store the joined data
-                }
-            }
-        ]);
+        const userData = await User.findAll({
+            include: [
+                {
+                    model: Recommend,
+                    as: 'recommends',
+                },
+            ],
+            attributes: {
+                exclude: ['password', 'email'],
+            },
+        });
+
+        const users = [];
+        for (let i = 0; i < userData.length; i++) {
+            users.push(userData[i].toJSON())
+        }
 
         const lst = [];
         for (let i = 0; i < users.length; i++) {
@@ -50,12 +63,12 @@ exports.usersAction = async (req, res) => {
             }
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
-            users: lst
+            users: lst,
         });
     } catch (e) {
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: e.message,
         });
@@ -64,16 +77,19 @@ exports.usersAction = async (req, res) => {
 
 exports.individualAction = async (req, res) => {
     try {
-        const userId = req.user._id;
-        const recommends = await Recommend.find({
-            userId
+        const userId = req.user.id;
+        const recommends = await Recommend.findAll({
+            where: {
+                userId: userId
+            }
         });
-        res.status(200).json({
+
+        return res.status(200).json({
             status: 'success',
             recommends
         })
     } catch (e) {
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: e.message,
         });

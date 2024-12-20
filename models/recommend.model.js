@@ -1,21 +1,32 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const { DataTypes } = require('sequelize');
+const sequelize = require('../configs/db');
+const User = require('./user.model');
 
-const RecommendSchema = new Schema(
-    {
-        status: {
-            type: Number,
-        },
-        userId: {
-            type: Schema.Types.ObjectId, // Reference to User model
-            ref: 'User',
-        }
+const Recommend = sequelize.define('Recommend', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
     },
-    {
-        timestamps: true,
-    }
-);
-
-const Recommend = mongoose.model('Recommend', RecommendSchema);
+    status: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: User,
+            key: 'id',
+        },
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'User',
+            key: 'id'
+        },
+    },
+}, {
+    timestamps: true,
+    tableName: 'recommends',
+});
+User.hasMany(Recommend, { foreignKey: 'userId', as: 'recommends' });
+Recommend.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 module.exports = Recommend;
